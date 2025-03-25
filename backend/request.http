@@ -24,25 +24,28 @@ Content-Type: application/json
   "password": "pass123"
 }
 
-#####
-POST http://localhost:1234/hospital/register
+### ✅ Hospital Registration
+POST http://localhost:5000/hospital/register
 Content-Type: application/json
 
 {
-  "name": "KMC Hospital",
-  "email": "kmchospital@gmail.com",
-  "password": "Pass123",
-  "phone": "9876543780",
-  "location": "Salem",
-  "registration_number": "HOSP456"
+  "name": "Spm hospital",
+  "email": "spm@gmail.com",
+  "password": "1234567",
+  "phone": "9876456210",
+  "location": "salem",
+  "registration_number": "HOSP097"
 }
 
-####
-POST http://localhost:1234/hospital/login
+### ✅ Hospital Login
+POST http://localhost:5000/hospital/login
 Content-Type: application/json
 
 {
-  "email": "kmchospital@gmail.com",
-  "password": "Pass123"
+  "email": "spm@gmail.com",
+  "password": "1234567"
 }
 
+### ✅ Fetch Hospital Profile (Use Token from Login Response)
+GET http://localhost:5000/hospital/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzcG1AZ21haWwuY29tIiwiaWF0IjoxNzQyOTMwNjYzLCJleHAiOjE3NDI5MzQyNjN9.uyoPXqEcgvizhQIyg3eK-1ECW6gNGPPlWTqrEdj_3OU

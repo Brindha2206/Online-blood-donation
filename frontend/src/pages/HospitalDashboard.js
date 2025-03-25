@@ -50,7 +50,7 @@ const HospitalDashboard = () => {
       }
 
       try {
-        const response = await fetch("http://localhost:1234/hospital/profile", {
+        const response = await fetch("http://localhost:5000/hospital/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
