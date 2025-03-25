@@ -106,7 +106,7 @@ const HospitalLogin = () => {
               Not have an account?{" "}
               <Link 
                 href="#" 
-                onClick={() => navigate("/donor-register")}
+                onClick={() => navigate("/hospital-register")}
                 sx={{ color: 'primary.dark', fontWeight: 600 }}
               >
                 Register now

@@ -8,8 +8,13 @@ import {
   createTheme,
   ThemeProvider,
   CssBaseline,
-  Container
+  Container,
+  Link,
+  
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+
 
 const medicalTheme = createTheme({
   palette: {
@@ -29,6 +34,7 @@ const medicalTheme = createTheme({
 });
 
 const HospitalRegister = () => {
+  const navigate = useNavigate();
   const [hospital, setHospital] = useState({
     name: "",
     email: "",
@@ -45,7 +51,7 @@ const HospitalRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:1234/hospital/register", {
+    const response = await fetch("http://localhost:5000/hospital/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(hospital),
@@ -124,15 +130,32 @@ const HospitalRegister = () => {
               margin="normal"
               required
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
-            >
-              Register
-            </Button>
+             <Button 
+                        type="submit" 
+                        variant="contained" 
+                        color="primary" 
+                        fullWidth
+                        size="large"
+                        sx={{
+                          py: 1.5,
+                          fontWeight: 600,
+                          borderRadius: 2
+                        }}
+                      >
+                        Register
+                      </Button>
+          </Box>
+          <Box mt={3} textAlign="center">
+            <Typography variant="body2">
+              Already have an account?{" "}
+              <Link 
+                href="#" 
+                onClick={() => navigate("/hospital-login")}
+                sx={{ color: 'primary.dark', fontWeight: 600 }}
+              >
+                Login here
+              </Link>
+            </Typography>
           </Box>
         </Paper>
       </Container>

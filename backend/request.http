@@ -49,3 +49,32 @@ Content-Type: application/json
 ### ✅ Fetch Hospital Profile (Use Token from Login Response)
 GET http://localhost:5000/hospital/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzcG1AZ21haWwuY29tIiwiaWF0IjoxNzQyOTMwNjYzLCJleHAiOjE3NDI5MzQyNjN9.uyoPXqEcgvizhQIyg3eK-1ECW6gNGPPlWTqrEdj_3OU
+
+### ✅ Get All Donors
+GET http://localhost:5000/hospital/donors
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJzcG1AZ21haWwuY29tIiwiaWF0IjoxNzQyOTMwNjYzLCJleHAiOjE3NDI5MzQyNjN9.uyoPXqEcgvizhQIyg3eK-1ECW6gNGPPlWTqrEdj_3OU
+
+### ✅ Filter Donors by Blood Group
+GET http://localhost:5000/hospital/donors?bloodGroup=A+
+Authorization: Bearer your_hospital_jwt_token
+
+### ✅ Filter Donors by Location
+GET http://localhost:5000/hospital/donors?location=Chennai
+Authorization: Bearer your_hospital_jwt_token
+
+### ✅ Filter Donors by Blood Group & Location
+GET http://localhost:5000/hospital/donors?bloodGroup=B+&location=Delhi
+Authorization: Bearer your_hospital_jwt_token
+
+
+### ✅ Get All Donors (No Authentication Required)
+GET http://localhost:5000/hospital/donors
+
+### ✅ Filter Donors by Blood Group
+GET http://localhost:5000/hospital/donors?bloodGroup=B+
+
+### ✅ Filter Donors by Location
+GET http://localhost:5000/hospital/donors?location=salem
+
+### ✅ Filter Donors by Blood Group & Location
+GET http://localhost:5000/hospital/donors?bloodGroup=B+&location=salem
