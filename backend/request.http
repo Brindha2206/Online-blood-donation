@@ -1,0 +1,5 @@
+### Check if the backend is running
+GET http://localhost:1234/
+
+### Test MySQL Database Connection
+GET http://localhost:1234/test-db
