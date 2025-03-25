@@ -60,7 +60,7 @@ const DonorRegister = () => {
     }
 
     try {
-      await axios.post("http://localhost:1234/donor/register", {
+      await axios.post("http://localhost:5000/donor/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password,

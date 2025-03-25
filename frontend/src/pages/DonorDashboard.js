@@ -123,7 +123,7 @@ const DonorDashboard = () => {
       }
 
       try {
-        const response = await axios.get(`http://localhost:1234/donor/${donorId}`, {
+        const response = await axios.get(`http://localhost:5000/donor/${donorId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -180,7 +180,7 @@ const DonorDashboard = () => {
       const donorId = localStorage.getItem("donorId");
       const token = localStorage.getItem("token");
       
-      const response = await axios.put(`http://localhost:1234/donor/${donorId}`, formData, {
+      const response = await axios.put(`http://localhost:5000/donor/${donorId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
