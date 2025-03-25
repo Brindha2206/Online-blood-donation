@@ -1,7 +1,35 @@
 import React, { useState } from "react";
-import { TextField, Button, Container, Typography, Box, Link } from "@mui/material";
+import { 
+  TextField, 
+  Button, 
+  Container, 
+  Typography, 
+  Box, 
+  Link,
+  createTheme,
+  ThemeProvider,
+  CssBaseline,
+  Paper
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+const medicalTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#8e1318',
+      dark: '#5a0a0d',
+      light: '#c2185b',
+    },
+    secondary: {
+      main: '#00695c',
+    },
+    background: {
+      default: '#fafafa',
+      paper: '#ffffff',
+    },
+  },
+});
 
 const DonorLogin = () => {
   const navigate = useNavigate();
@@ -21,7 +49,7 @@ const DonorLogin = () => {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("donorId", response.data.donorId);
         localStorage.setItem("donorName", response.data.name);
-        navigate("/donor-dashboard"); // Redirect after login
+        navigate("/donor-dashboard");
       }
     } catch (error) {
       setError(error.response?.data?.message || "❌ Invalid credentials!");
@@ -29,48 +57,80 @@ const DonorLogin = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom align="center">
-        Donor Login
-      </Typography>
-      {error && <Typography color="error" align="center">{error}</Typography>}
-      <form onSubmit={handleLogin}>
-        <Box mb={2}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </Box>
-        <Box mb={2}>
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </Box>
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Login
-        </Button>
-      </form>
+    <ThemeProvider theme={medicalTheme}>
+      <CssBaseline />
+      <Container maxWidth="sm" sx={{ py: 8 }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+          <Typography variant="h4" gutterBottom align="center" sx={{ 
+            color: 'primary.dark',
+            fontWeight: 700,
+            mb: 4
+          }}>
+            Donor Login
+          </Typography>
+          
+          {error && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+          
+          <form onSubmit={handleLogin}>
+            <Box mb={3}>
+              <TextField
+                label="Email"
+                variant="outlined"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                sx={{ backgroundColor: '#fff' }}
+              />
+            </Box>
+            <Box mb={3}>
+              <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                sx={{ backgroundColor: '#fff' }}
+              />
+            </Box>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              color="primary" 
+              fullWidth
+              size="large"
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: 2,
+                mb: 2
+              }}
+            >
+              Login
+            </Button>
+          </form>
 
-      {/* Registration Link */}
-      <Box mt={2} textAlign="center">
-        <Typography variant="body2">
-          Not have an account?{" "}
-          <Link href="#" onClick={() => navigate("/donor-register")}>
-            Register now
-          </Link>
-        </Typography>
-      </Box>
-    </Container>
+          <Box mt={3} textAlign="center">
+            <Typography variant="body2">
+              Not have an account?{" "}
+              <Link 
+                href="#" 
+                onClick={() => navigate("/donor-register")}
+                sx={{ color: 'primary.dark', fontWeight: 600 }}
+              >
+                Register now
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
 };
 
