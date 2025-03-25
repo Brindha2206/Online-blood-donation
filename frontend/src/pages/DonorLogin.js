@@ -7,20 +7,24 @@ const DonorLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/login", {
+      const response = await axios.post("http://localhost:1234/donor/login", {
         email,
         password,
-        role: "donor",
       });
 
-      localStorage.setItem("token", response.data.token);
-      navigate("/donor-dashboard"); // Redirect after login
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("donorId", response.data.donorId);
+        localStorage.setItem("donorName", response.data.name);
+        navigate("/donor-dashboard"); // Redirect after login
+      }
     } catch (error) {
-      alert("Invalid credentials");
+      setError(error.response?.data?.message || "❌ Invalid credentials!");
     }
   };
 
@@ -29,6 +33,7 @@ const DonorLogin = () => {
       <Typography variant="h4" gutterBottom align="center">
         Donor Login
       </Typography>
+      {error && <Typography color="error" align="center">{error}</Typography>}
       <form onSubmit={handleLogin}>
         <Box mb={2}>
           <TextField
@@ -37,6 +42,7 @@ const DonorLogin = () => {
             fullWidth
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </Box>
         <Box mb={2}>
@@ -47,6 +53,7 @@ const DonorLogin = () => {
             fullWidth
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </Box>
         <Button type="submit" variant="contained" color="primary" fullWidth>

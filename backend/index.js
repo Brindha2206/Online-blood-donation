@@ -1,25 +1,16 @@
 const express = require("express");
-const db = require("./db"); // Import the MySQL connection object
+const cors = require("cors");
+const db = require("./db"); // MySQL connection
+const donorRoutes = require("./routes/donorRoutes"); // Import donor routes
 
 const app = express();
 const PORT = 1234;
 
-// Route to check if the server is running
-app.get("/", (req, res) => {
-  res.send("✅ Backend is running!");
-});
+app.use(express.json()); // Middleware to parse JSON requests
+app.use(cors()); // Enable CORS
 
-// Route to test MySQL connection
-app.get("/test-db", (req, res) => {
-  db.query("SELECT 1", (err, rows) => {
-    if (err) {
-      return res.status(500).json({ message: "❌ Database connection failed", error: err.message });
-    }
-    res.json({ message: "✅ Database connected successfully", result: rows });
-  });
-});
+app.use("/donor", donorRoutes); // Use donor routes
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

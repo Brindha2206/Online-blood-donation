@@ -5,6 +5,7 @@ import DonorLogin from "./pages/DonorLogin";
 import HospitalLogin from "./pages/HospitalLogin";
 import DonorRegister from "./pages/DonorRegister";
 import HospitalRegister from "./pages/HospitalRegister";
+import DonorDashboard from "./pages/DonorDashboard";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/hospital-login" element={<HospitalLogin />} />
         <Route path="/donor-register" element={<DonorRegister />} />
         <Route path="/hospital-register" element={<HospitalRegister/>}/>
+        <Route path="/donor-dashboard" element={<DonorDashboard/>}/>
       </Routes>
     </Router>
   );

@@ -15,7 +15,9 @@ const DonorRegister = () => {
     mobile: "",
     location: "",
     bloodGroup: "",
+    dateOfBirth: "",
   });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,25 +26,25 @@ const DonorRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5000/api/register", {
+      await axios.post("http://localhost:1234/donor/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        mobile: formData.mobile,
+        phone: formData.mobile,
         location: formData.location,
-        bloodGroup: formData.bloodGroup,
-        role: "donor",
+        blood_group: formData.bloodGroup,
+        date_of_birth: formData.dateOfBirth,
       });
 
-      alert("Registration successful! Please log in.");
+      alert("✅ Registration successful! Please log in.");
       navigate("/donor-login"); // Redirect to login page
     } catch (error) {
-      alert("Registration failed! Try again.");
+      setError("❌ Registration failed! Try again.");
     }
   };
 
@@ -51,6 +53,7 @@ const DonorRegister = () => {
       <Typography variant="h4" gutterBottom align="center">
         Donor Registration
       </Typography>
+      {error && <Typography color="error" align="center">{error}</Typography>}
       <form onSubmit={handleSubmit}>
         <Box mb={2}>
           <TextField
@@ -138,12 +141,24 @@ const DonorRegister = () => {
             ))}
           </TextField>
         </Box>
+        <Box mb={2}>
+          <TextField
+            label="Date of Birth"
+            type="date"
+            variant="outlined"
+            fullWidth
+            name="dateOfBirth"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            required
+          />
+        </Box>
         <Button type="submit" variant="contained" color="primary" fullWidth>
           Register
         </Button>
       </form>
 
-      {/* Login Link */}
       <Box mt={2} textAlign="center">
         <Typography variant="body2">
           Already have an account?{" "}

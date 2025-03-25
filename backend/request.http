@@ -1,5 +1,26 @@
-### Check if the backend is running
-GET http://localhost:1234/
+### Register a new donor
+POST http://localhost:1234/donor/register
+Content-Type: application/json
 
-### Test MySQL Database Connection
-GET http://localhost:1234/test-db
+{
+  "name": "Aarthi",
+  "email": "aarthi@gmail.com",
+  "password": "pass123",
+  "phone": "1274674830",
+  "location": "salem",
+  "blood_group": "B+ve",
+  "date_of_birth": "2005-02-24"
+}
+
+### Get all donors
+GET http://localhost:1234/donor/all
+
+### Donor Login (Test this after registering a donor)
+POST http://localhost:1234/donor/login
+Content-Type: application/json
+
+{
+  "email": "aarthi@gmail.com",
+  "password": "pass123"
+}
+
