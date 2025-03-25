@@ -13,7 +13,11 @@ import {
   createTheme,
   ThemeProvider,
   CssBaseline,
-  CircularProgress
+  CircularProgress,
+  Tabs,
+  Tab,
+  TextField,
+  MenuItem
 } from "@mui/material";
 
 const medicalTheme = createTheme({
@@ -97,6 +101,16 @@ const DonorDashboard = () => {
   const [donor, setDonor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('home');
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    blood_group: '',
+    date_of_birth: ''
+  });
 
   useEffect(() => {
     const fetchDonorData = async () => {
@@ -115,6 +129,14 @@ const DonorDashboard = () => {
           }
         });
         setDonor(response.data);
+        setFormData({
+          name: response.data.name,
+          email: response.data.email,
+          phone: response.data.phone,
+          location: response.data.location,
+          blood_group: response.data.blood_group,
+          date_of_birth: response.data.date_of_birth
+        });
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch donor data");
         console.error("Error fetching donor data:", err);
@@ -131,6 +153,53 @@ const DonorDashboard = () => {
     localStorage.removeItem("donorName");
     localStorage.removeItem("token");
     navigate("/donor-login");
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  const handleEdit = () => {
+    setEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setFormData({
+      name: donor.name,
+      email: donor.email,
+      phone: donor.phone,
+      location: donor.location,
+      blood_group: donor.blood_group,
+      date_of_birth: donor.date_of_birth
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      const donorId = localStorage.getItem("donorId");
+      const token = localStorage.getItem("token");
+      
+      const response = await axios.put(`http://localhost:1234/donor/${donorId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      setDonor(response.data);
+      setEditMode(false);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update donor data");
+      console.error("Error updating donor data:", err);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   if (isLoading) {
@@ -174,108 +243,275 @@ const DonorDashboard = () => {
     );
   }
 
-  const bloodInfo = bloodGroupInfo[donor.blood_group] || {};
+  const bloodInfo = donor.blood_group ? bloodGroupInfo[donor.blood_group] : null;
 
   return (
     <ThemeProvider theme={medicalTheme}>
       <CssBaseline />
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Donor Information Section */}
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-          <Typography variant="h4" align="center" gutterBottom sx={{ 
-            color: 'primary.dark',
-            fontWeight: 700,
-            mb: 3
-          }}>
-            Welcome, {donor.name}!
-          </Typography>
-
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                    Personal Information
-                  </Typography>
-                  <Typography variant="body1"><strong>Email:</strong> {donor.email}</Typography>
-                  <Typography variant="body1"><strong>Phone:</strong> {donor.phone}</Typography>
-                  <Typography variant="body1"><strong>Location:</strong> {donor.location}</Typography>
-                  <Typography variant="body1"><strong>Date of Birth:</strong> {donor.date_of_birth}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                    Blood & Donation Info
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Blood Group:</strong> {donor.blood_group}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mt: 1 }}>
-                    <strong>Donation History:</strong> {donor.donation_history !== "nil" ? donor.donation_history : "No records yet"}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+        {/* Navigation Tabs */}
+        <Paper elevation={3} sx={{ mb: 4, borderRadius: 3 }}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="fullWidth"
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            <Tab label="Home" value="home" />
+            <Tab label="Donor Details" value="details" />
+            <Tab label="Donation History" value="history" />
+            <Tab label="Settings" value="settings" />
+          </Tabs>
         </Paper>
 
-        {/* Blood Group Information Section */}
-        {bloodInfo.facts && (
+        {/* Home Tab */}
+        {activeTab === 'home' && (
           <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
             <Typography variant="h4" align="center" gutterBottom sx={{ 
               color: 'primary.dark',
               fontWeight: 700,
-              mb: 4
+              mb: 3
             }}>
-              Your {donor.blood_group} Blood Group Details
+              Welcome, {donor.name}!
+            </Typography>
+
+            {bloodInfo ? (
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
+                        Your Blood Group: {donor.blood_group}
+                      </Typography>
+                      <Typography variant="body1">
+                        <strong>You can donate to:</strong> {bloodInfo.donateTo?.join(", ") || "Not specified"}
+                      </Typography>
+                      <Typography variant="body1" sx={{ mt: 1 }}>
+                        <strong>You can receive from:</strong> {bloodInfo.receiveFrom?.join(", ") || "Not specified"}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
+                        Donation Recommendations
+                      </Typography>
+                      <Typography variant="body1">{bloodInfo.donationTips || "No specific recommendations available"}</Typography>
+                      <Typography variant="body1" sx={{ mt: 2 }}>
+                        <strong>Did you know?</strong> {bloodInfo.facts || "No facts available"}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            ) : (
+              <Typography variant="body1" color="textSecondary" align="center">
+                No blood group information available
+              </Typography>
+            )}
+          </Paper>
+        )}
+
+        {/* Donor Details Tab */}
+        {activeTab === 'details' && (
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom sx={{ 
+              color: 'primary.dark',
+              fontWeight: 700,
+              mb: 3
+            }}>
+              Your Details
             </Typography>
 
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
-                <Card sx={{ height: '100%', borderLeft: '4px solid #8e1318' }}>
+                <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                      Compatibility
+                      Personal Information
                     </Typography>
-                    <Typography variant="body1">
-                      <strong>You can donate to:</strong> {bloodInfo.donateTo.join(", ")}
-                    </Typography>
-                    <Typography variant="body1" sx={{ mt: 1 }}>
-                      <strong>You can receive from:</strong> {bloodInfo.receiveFrom.join(", ")}
-                    </Typography>
+                    <Typography variant="body1"><strong>Name:</strong> {donor.name}</Typography>
+                    <Typography variant="body1"><strong>Email:</strong> {donor.email}</Typography>
+                    <Typography variant="body1"><strong>Phone:</strong> {donor.phone}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
-
+              
               <Grid item xs={12} md={6}>
-                <Card sx={{ height: '100%', borderLeft: '4px solid #00695c' }}>
+                <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                      Medical Characteristics
+                      Additional Information
                     </Typography>
-                    <Typography variant="body1">{bloodInfo.characteristics}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Card sx={{ backgroundColor: 'rgba(142, 19, 24, 0.05)' }}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                      Donation Recommendations
-                    </Typography>
-                    <Typography variant="body1">{bloodInfo.donationTips}</Typography>
-                    <Typography variant="body1" sx={{ mt: 2 }}>
-                      <strong>Interesting Fact:</strong> {bloodInfo.facts}
-                    </Typography>
+                    <Typography variant="body1"><strong>Location:</strong> {donor.location}</Typography>
+                    <Typography variant="body1"><strong>Blood Group:</strong> {donor.blood_group || "Not specified"}</Typography>
+                    <Typography variant="body1"><strong>Date of Birth:</strong> {donor.date_of_birth}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
+          </Paper>
+        )}
+
+        {/* Donation History Tab */}
+        {activeTab === 'history' && (
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom sx={{ 
+              color: 'primary.dark',
+              fontWeight: 700,
+              mb: 3
+            }}>
+              Your Donation History
+            </Typography>
+
+            <Card sx={{ width: '100%' }}>
+              <CardContent>
+                {donor.donation_history !== "nil" ? (
+                  <>
+                    <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
+                      Recent Donations
+                    </Typography>
+                    <Typography variant="body1">{donor.donation_history}</Typography>
+                  </>
+                ) : (
+                  <Typography variant="body1" color="textSecondary">
+                    No donation records yet. Consider making your first donation!
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Paper>
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom sx={{ 
+              color: 'primary.dark',
+              fontWeight: 700,
+              mb: 3
+            }}>
+              Account Settings
+            </Typography>
+
+            {editMode ? (
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    margin="normal"
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    margin="normal"
+                    type="email"
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="Phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    margin="normal"
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    margin="normal"
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    select
+                    label="Blood Group"
+                    name="blood_group"
+                    value={formData.blood_group}
+                    onChange={handleChange}
+                    margin="normal"
+                    required
+                  >
+                    {Object.keys(bloodGroupInfo).map((group) => (
+                      <MenuItem key={group} value={group}>
+                        {group}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <TextField
+                    fullWidth
+                    label="Date of Birth"
+                    name="date_of_birth"
+                    type="date"
+                    value={formData.date_of_birth}
+                    onChange={handleChange}
+                    margin="normal"
+                    InputLabelProps={{ shrink: true }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSave}
+                    >
+                      Save Changes
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            ) : (
+              <>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body1"><strong>Name:</strong> {donor.name}</Typography>
+                    <Typography variant="body1"><strong>Email:</strong> {donor.email}</Typography>
+                    <Typography variant="body1"><strong>Phone:</strong> {donor.phone}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body1"><strong>Location:</strong> {donor.location}</Typography>
+                    <Typography variant="body1"><strong>Blood Group:</strong> {donor.blood_group || "Not specified"}</Typography>
+                    <Typography variant="body1"><strong>Date of Birth:</strong> {donor.date_of_birth}</Typography>
+                  </Grid>
+                </Grid>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleEdit}
+                  >
+                    Edit Information
+                  </Button>
+                </Box>
+              </>
+            )}
           </Paper>
         )}
 

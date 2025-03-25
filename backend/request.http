@@ -24,3 +24,25 @@ Content-Type: application/json
   "password": "pass123"
 }
 
+#####
+POST http://localhost:1234/hospital/register
+Content-Type: application/json
+
+{
+  "name": "KMC Hospital",
+  "email": "kmchospital@gmail.com",
+  "password": "Pass123",
+  "phone": "9876543780",
+  "location": "Salem",
+  "registration_number": "HOSP456"
+}
+
+####
+POST http://localhost:1234/hospital/login
+Content-Type: application/json
+
+{
+  "email": "kmchospital@gmail.com",
+  "password": "Pass123"
+}
+

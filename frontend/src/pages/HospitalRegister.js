@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 import { 
-  TextField, 
   Button, 
-  Container, 
+  TextField, 
   Typography, 
+  Paper, 
   Box,
-  Link,
   createTheme,
   ThemeProvider,
   CssBaseline,
-  Paper
+  Container
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const medicalTheme = createTheme({
   palette: {
@@ -32,39 +29,29 @@ const medicalTheme = createTheme({
 });
 
 const HospitalRegister = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [hospital, setHospital] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
     phone: "",
     location: "",
-    registrationNumber: "",
+    registration_number: "",
   });
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setHospital({ ...hospital, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
-      return;
-    }
-
-    try {
-      await axios.post("http://localhost:5000/api/hospital-register", {
-        ...formData,
-        role: "hospital",
-      });
-      alert("Registration successful! Please log in.");
-      navigate("/hospital-login");
-    } catch (error) {
-      setError("Registration failed! Please try again.");
-    }
+    const response = await fetch("http://localhost:1234/hospital/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hospital),
+    });
+    const data = await response.json();
+    setMessage(data.message || data.error);
   };
 
   return (
@@ -75,133 +62,77 @@ const HospitalRegister = () => {
           <Typography variant="h4" align="center" gutterBottom sx={{ 
             color: 'primary.dark',
             fontWeight: 700,
-            mb: 4
+            mb: 3
           }}>
             Hospital Registration
           </Typography>
           
-          {error && (
-            <Typography color="error" align="center" sx={{ mb: 3 }}>
-              {error}
+          {message && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {message}
             </Typography>
           )}
           
-          <form onSubmit={handleSubmit}>
-            <Box mb={3}>
-              <TextField
-                label="Hospital Name"
-                name="name"
-                variant="outlined"
-                fullWidth
-                value={formData.name}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={3}>
-              <TextField
-                label="Email"
-                name="email"
-                type="email"
-                variant="outlined"
-                fullWidth
-                value={formData.email}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={3}>
-              <TextField
-                label="Password"
-                name="password"
-                type="password"
-                variant="outlined"
-                fullWidth
-                value={formData.password}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={3}>
-              <TextField
-                label="Confirm Password"
-                name="confirmPassword"
-                type="password"
-                variant="outlined"
-                fullWidth
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={3}>
-              <TextField
-                label="Phone Number"
-                name="phone"
-                type="tel"
-                variant="outlined"
-                fullWidth
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={3}>
-              <TextField
-                label="Location"
-                name="location"
-                variant="outlined"
-                fullWidth
-                value={formData.location}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={4}>
-              <TextField
-                label="Registration Number"
-                name="registrationNumber"
-                variant="outlined"
-                fullWidth
-                value={formData.registrationNumber}
-                onChange={handleChange}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary" 
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <TextField
               fullWidth
-              size="large"
-              sx={{
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: 2
-              }}
+              label="Hospital Name"
+              name="name"
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Location"
+              name="location"
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Registration Number"
+              name="registration_number"
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{ mt: 3, mb: 2, py: 1.5 }}
             >
               Register
             </Button>
-          </form>
-          
-          <Box mt={3} textAlign="center">
-            <Typography variant="body2">
-              Already have an account?{" "}
-              <Link 
-                href="#" 
-                onClick={() => navigate("/hospital-login")}
-                sx={{ color: 'primary.dark', fontWeight: 600 }}
-              >
-                Login here
-              </Link>
-            </Typography>
           </Box>
         </Paper>
       </Container>

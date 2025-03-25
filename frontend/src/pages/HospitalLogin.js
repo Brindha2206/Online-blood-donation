@@ -1,18 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
-  TextField, 
   Button, 
-  Container, 
+  TextField, 
   Typography, 
-  Box, 
-  Link,
+  Paper, 
+  Box,
   createTheme,
   ThemeProvider,
   CssBaseline,
-  Paper
+  Container,
+  Link
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const medicalTheme = createTheme({
   palette: {
@@ -32,24 +31,25 @@ const medicalTheme = createTheme({
 });
 
 const HospitalLogin = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:5000/api/login", {
-        email,
-        password,
-        role: "hospital",
-      });
+    const response = await fetch("http://localhost:1234/hospital/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      localStorage.setItem("token", response.data.token);
+    const data = await response.json();
+    if (data.token) {
+      localStorage.setItem("hospitalToken", data.token);
       navigate("/hospital-dashboard");
-    } catch (error) {
-      setError("Invalid credentials");
+    } else {
+      setMessage(data.error);
     }
   };
 
@@ -58,67 +58,55 @@ const HospitalLogin = () => {
       <CssBaseline />
       <Container maxWidth="sm" sx={{ py: 8 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-          <Typography variant="h4" gutterBottom align="center" sx={{ 
+          <Typography variant="h4" align="center" gutterBottom sx={{ 
             color: 'primary.dark',
             fontWeight: 700,
-            mb: 4
+            mb: 3
           }}>
             Hospital Login
           </Typography>
           
-          {error && (
-            <Typography color="error" align="center" sx={{ mb: 3 }}>
-              {error}
+          {message && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {message}
             </Typography>
           )}
           
-          <form onSubmit={handleLogin}>
-            <Box mb={3}>
-              <TextField
-                label="Email"
-                variant="outlined"
-                fullWidth
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Box mb={3}>
-              <TextField
-                label="Password"
-                type="password"
-                variant="outlined"
-                fullWidth
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                sx={{ backgroundColor: '#fff' }}
-              />
-            </Box>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary" 
+          <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
+            <TextField
               fullWidth
-              size="large"
-              sx={{
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: 2,
-                mb: 2
-              }}
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              margin="normal"
+              required
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{ mt: 3, mb: 2, py: 1.5 }}
             >
               Login
             </Button>
-          </form>
-
+          </Box>
           <Box mt={3} textAlign="center">
             <Typography variant="body2">
               Not have an account?{" "}
               <Link 
                 href="#" 
-                onClick={() => navigate("/hospital-register")}
+                onClick={() => navigate("/donor-register")}
                 sx={{ color: 'primary.dark', fontWeight: 600 }}
               >
                 Register now
