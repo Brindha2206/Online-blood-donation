@@ -1,8 +1,8 @@
 const express = require("express");
-const db = require("../db"); // MySQL connection
-const bcrypt = require("bcrypt");
-
 const router = express.Router();
+const db = require("../db");
+const authenticateToken = require("../middleware/authenticateToken");
+const bcrypt = require("bcrypt");
 
 // ✅ 1️⃣ Donor Registration Route
 router.post("/register", async (req, res) => {
@@ -89,6 +89,101 @@ router.get("/:id", (req, res) => {
 
     res.status(200).json(results[0]);
   });
+});
+
+// ✅ Fetch donor details
+router.get("/profile", authenticateToken, async (req, res) => {
+    try {
+        const donorId = req.user.id;
+        const [donor] = await db.promise().query(
+            "SELECT id, name, email, blood_group, location FROM donors WHERE id = ?",
+            [donorId]
+        );
+
+        if (donor.length === 0) {
+            return res.status(404).json({ message: "Donor not found" });
+        }
+
+        res.json(donor[0]);
+    } catch (error) {
+        res.status(500).json({ message: "Database error", error: error.message });
+    }
+});
+
+// ✅ Get all emergency notifications for the logged-in donor
+router.get("/notifications", authenticateToken, async (req, res) => {
+    try {
+        const donorId = req.user.id;
+        const [notifications] = await db.promise().query(
+            "SELECT n.id, h.name AS hospital_name, n.message, n.status, n.created_at " +
+            "FROM notifications n JOIN hospitals h ON n.hospital_id = h.id " +
+            "WHERE n.donor_id = ? ORDER BY n.created_at DESC",
+            [donorId]
+        );
+
+        res.json(notifications);
+    } catch (error) {
+        res.status(500).json({ message: "Database error", error: error.message });
+    }
+});
+
+// ✅ Accept or Reject Emergency Notification
+router.post("/notifications/respond", authenticateToken, async (req, res) => {
+    try {
+        const { notificationId, response } = req.body;
+        const donorId = req.user.id;
+
+        if (!['accepted', 'rejected'].includes(response)) {
+            return res.status(400).json({ message: "Invalid response" });
+        }
+
+        // Update the notification status
+        const [result] = await db.promise().query(
+            "UPDATE notifications SET status = ? WHERE id = ? AND donor_id = ?",
+            [response, notificationId, donorId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Notification not found or already updated" });
+        }
+
+        // If accepted, add to donation history
+        if (response === "accepted") {
+            const [notification] = await db.promise().query(
+                "SELECT hospital_id FROM notifications WHERE id = ?",
+                [notificationId]
+            );
+
+            if (notification.length > 0) {
+                const hospitalId = notification[0].hospital_id;
+                await db.promise().query(
+                    "INSERT INTO donation_history (donor_id, hospital_id, donation_date) VALUES (?, ?, NOW())",
+                    [donorId, hospitalId]
+                );
+            }
+        }
+
+        res.json({ message: `Notification ${response} successfully!` });
+    } catch (error) {
+        res.status(500).json({ message: "Database error", error: error.message });
+    }
+});
+
+// ✅ Get Donation History of Donor
+router.get("/donation-history", authenticateToken, async (req, res) => {
+    try {
+        const donorId = req.user.id;
+        const [history] = await db.promise().query(
+            "SELECT dh.id, h.name AS hospital_name, dh.donation_date " +
+            "FROM donation_history dh JOIN hospitals h ON dh.hospital_id = h.id " +
+            "WHERE dh.donor_id = ? ORDER BY dh.donation_date DESC",
+            [donorId]
+        );
+
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ message: "Database error", error: error.message });
+    }
 });
 
 module.exports = router;

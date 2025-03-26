@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import { 
   Button, 
   Container, 
@@ -25,8 +28,15 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  FormControl
+  FormControl,
+  Badge,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Chip
 } from "@mui/material";
+import WarningIcon from '@mui/icons-material/Warning';
 
 const medicalTheme = createTheme({
   palette: {
@@ -52,14 +62,13 @@ const HospitalDashboard = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [donors, setDonors] = useState([]);
-  const [blood_group, setBlood_group] = useState("");
+  const [filteredDonors, setFilteredDonors] = useState([]);
+  const [bloodGroup, setBloodGroup] = useState("");
   const [location, setLocation] = useState("");
-  const [selectedBloodGroup, setSelectedBloodGroup] = useState("");
-const [selectedLocation, setSelectedLocation] = useState("");
-
+  const [requests, setRequests] = useState([]);
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
 
   useEffect(() => {
-    console.log(selectedBloodGroup, selectedLocation);  // Debugging
     const fetchHospitalData = async () => {
       const token = localStorage.getItem("hospitalToken");
       if (!token) {
@@ -68,13 +77,12 @@ const [selectedLocation, setSelectedLocation] = useState("");
       }
 
       try {
-        const response = await fetch("http://localhost:5000/hospital/profile", {
+        const response = await axios.get("http://localhost:5000/hospital/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        const data = await response.json();
-        setHospital(data);
+        setHospital(response.data);
       } catch (err) {
         setError("Failed to fetch hospital data");
       } finally {
@@ -89,20 +97,68 @@ const [selectedLocation, setSelectedLocation] = useState("");
     if (activeTab === 'donors') {
       fetchDonors();
     }
-  }, [blood_group, location, activeTab]);
+    if (activeTab === 'requests') {
+      fetchRequests();
+    }
+  }, [activeTab]);
 
   const fetchDonors = async () => {
-    let url = "http://localhost:5000/hospital/donors";
-    if (blood_group || location) {
-      url += `?blood_group=${blood_group}&location=${location}`;
-    }
-
     try {
-      const response = await fetch(url);
-      const data = await response.json();
-      setDonors(data);
+      const response = await axios.get("http://localhost:5000/hospital/donors");
+      setDonors(response.data);
+      setFilteredDonors(response.data); // Initialize filtered donors with all donors
     } catch (err) {
       setError("Failed to fetch donors.");
+      toast.error("Failed to fetch donors");
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      const token = localStorage.getItem("hospitalToken");
+      const response = await axios.get("http://localhost:5000/api/hospital/requests", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setRequests(response.data);
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+      toast.error("Failed to fetch requests");
+    }
+  };
+
+  const handleFilter = () => {
+    const filtered = donors.filter(donor => {
+      const matchesBloodGroup = bloodGroup ? donor.blood_group === bloodGroup : true;
+      const matchesLocation = location ? donor.location.toLowerCase().includes(location.toLowerCase()) : true;
+      return matchesBloodGroup && matchesLocation;
+    });
+    setFilteredDonors(filtered);
+  };
+
+  const sendEmergencyAlert = async () => {
+    if (filteredDonors.length === 0) {
+      toast.warning("No donors match your filter criteria");
+      return;
+    }
+
+    setIsSendingRequest(true);
+    try {
+      const token = localStorage.getItem("hospitalToken");
+      const donorIds = filteredDonors.map(donor => donor.id);
+      
+      await axios.post(
+        "http://localhost:5000/api/hospital/emergency-alert", 
+        { donorIds, hospitalId: hospital.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      toast.success(`Emergency alert sent to ${filteredDonors.length} donor(s)`);
+      fetchRequests(); // Refresh requests after sending
+    } catch (error) {
+      toast.error("Failed to send emergency alert");
+      console.error("Error sending emergency alert:", error);
+    } finally {
+      setIsSendingRequest(false);
     }
   };
 
@@ -167,6 +223,14 @@ const [selectedLocation, setSelectedLocation] = useState("");
             <Tab label="Overview" value="overview" />
             <Tab label="Blood Inventory" value="inventory" />
             <Tab label="Donors" value="donors" />
+            <Tab 
+              label={
+                <Badge badgeContent={requests.length} color="error">
+                  Requests
+                </Badge>
+              } 
+              value="requests" 
+            />
             <Tab label="Settings" value="settings" />
           </Tabs>
         </Paper>
@@ -242,8 +306,8 @@ const [selectedLocation, setSelectedLocation] = useState("");
               <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel>Blood Group</InputLabel>
                 <Select
-                  value={blood_group}
-                  onChange={(e) => setBlood_group(e.target.value)}
+                  value={bloodGroup}
+                  onChange={(e) => setBloodGroup(e.target.value)}
                   label="Blood Group"
                 >
                   <MenuItem value="">All</MenuItem>
@@ -265,6 +329,25 @@ const [selectedLocation, setSelectedLocation] = useState("");
                 onChange={(e) => setLocation(e.target.value)}
                 sx={{ flexGrow: 1 }}
               />
+
+              <Button 
+                variant="contained" 
+                onClick={handleFilter}
+                sx={{ minWidth: 100 }}
+              >
+                Filter
+              </Button>
+
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<WarningIcon />}
+                onClick={sendEmergencyAlert}
+                disabled={isSendingRequest || filteredDonors.length === 0}
+                sx={{ minWidth: 180 }}
+              >
+                {isSendingRequest ? 'Sending...' : 'Send Emergency Alert'}
+              </Button>
             </Box>
 
             {/* Donors Table */}
@@ -280,8 +363,8 @@ const [selectedLocation, setSelectedLocation] = useState("");
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {donors.length > 0 ? (
-                    donors.map((donor) => (
+                  {filteredDonors.length > 0 ? (
+                    filteredDonors.map((donor) => (
                       <TableRow key={donor.id}>
                         <TableCell>{donor.name}</TableCell>
                         <TableCell>{donor.email}</TableCell>
@@ -293,13 +376,62 @@ const [selectedLocation, setSelectedLocation] = useState("");
                   ) : (
                     <TableRow>
                       <TableCell colSpan={5} align="center">
-                        No donors found
+                        No donors found matching your criteria
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
             </TableContainer>
+          </Paper>
+        )}
+
+        {/* Requests Tab */}
+        {activeTab === 'requests' && (
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom sx={{ 
+              color: 'primary.dark',
+              fontWeight: 700,
+              mb: 3
+            }}>
+              <WarningIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+              Emergency Requests
+            </Typography>
+
+            {requests.length > 0 ? (
+              <List>
+                {requests.map((request) => (
+                  <React.Fragment key={request.id}>
+                    <ListItem alignItems="flex-start">
+                      <ListItemText
+                        primary={`Donor: ${request.donor_name || `ID: ${request.donorId}`}`}
+                        secondary={
+                          <>
+                            <Typography component="span" variant="body2" color="text.primary">
+                              Status: 
+                            </Typography>
+                            {` ${request.status}`}
+                          </>
+                        }
+                      />
+                      <Chip 
+                        label={request.status} 
+                        color={
+                          request.status === 'Accepted' ? 'success' : 
+                          request.status === 'Rejected' ? 'error' : 'warning'
+                        }
+                        sx={{ ml: 2 }}
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body1" color="textSecondary" align="center">
+                No active emergency requests
+              </Typography>
+            )}
           </Paper>
         )}
 

@@ -17,8 +17,18 @@ import {
   Tabs,
   Tab,
   TextField,
-  MenuItem
+  MenuItem,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+  Chip,
+  Badge
 } from "@mui/material";
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const medicalTheme = createTheme({
   palette: {
@@ -103,6 +113,7 @@ const DonorDashboard = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
   const [editMode, setEditMode] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -147,6 +158,24 @@ const DonorDashboard = () => {
 
     fetchDonorData();
   }, [navigate]);
+
+  useEffect(() => {
+    if (donor) {
+      fetchNotifications();
+    }
+  }, [donor]);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/donors/notifications", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications(response.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("donorId");
@@ -200,6 +229,20 @@ const DonorDashboard = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleNotificationResponse = async (notificationId, response) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:5000/api/donors/notifications/${notificationId}/respond`,
+        { response },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchNotifications(); // Refresh notifications after response
+    } catch (error) {
+      console.error("Error responding to notification:", error);
+    }
   };
 
   if (isLoading) {
@@ -260,6 +303,14 @@ const DonorDashboard = () => {
           >
             <Tab label="Home" value="home" />
             <Tab label="Donor Details" value="details" />
+            <Tab 
+              label={
+                <Badge badgeContent={notifications.length} color="error">
+                  Notifications
+                </Badge>
+              } 
+              value="notifications" 
+            />
             <Tab label="Donation History" value="history" />
             <Tab label="Settings" value="settings" />
           </Tabs>
@@ -354,6 +405,69 @@ const DonorDashboard = () => {
                 </Card>
               </Grid>
             </Grid>
+          </Paper>
+        )}
+
+        {/* Notifications Tab */}
+        {activeTab === 'notifications' && (
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom sx={{ 
+              color: 'primary.dark',
+              fontWeight: 700,
+              mb: 3
+            }}>
+              <NotificationsIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
+              Emergency Notifications
+            </Typography>
+
+            {notifications.length === 0 ? (
+              <Typography variant="body1" color="textSecondary" align="center">
+                No new notifications
+              </Typography>
+            ) : (
+              <List>
+                {notifications.map((notification) => (
+                  <React.Fragment key={notification.id}>
+                    <ListItem alignItems="flex-start">
+                      <ListItemIcon>
+                        <Chip 
+                          label="URGENT" 
+                          color="error" 
+                          size="small" 
+                          sx={{ fontWeight: 'bold' }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={`🏥 ${notification.hospital_name}`}
+                        secondary={notification.message}
+                        secondaryTypographyProps={{ color: 'text.primary' }}
+                      />
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          startIcon={<CheckCircleIcon />}
+                          onClick={() => handleNotificationResponse(notification.id, "accepted")}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          startIcon={<CancelIcon />}
+                          onClick={() => handleNotificationResponse(notification.id, "rejected")}
+                        >
+                          Reject
+                        </Button>
+                      </Box>
+                    </ListItem>
+                    <Divider component="li" />
+                  </React.Fragment>
+                ))}
+              </List>
+            )}
           </Paper>
         )}
 

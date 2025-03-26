@@ -15,16 +15,12 @@ router.post("/register", async (req, res) => {
     }
 
     try {
-        // Check if hospital already exists
         const [existingHospital] = await db.promise().query("SELECT * FROM hospitals WHERE email = ?", [email]);
         if (existingHospital.length > 0) {
             return res.status(400).json({ message: "Hospital already registered with this email" });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert into database
         await db.promise().query(
             "INSERT INTO hospitals (name, email, password, phone, location, registration_number) VALUES (?, ?, ?, ?, ?, ?)",
             [name, email, hashedPassword, phone, location, registration_number]
@@ -81,7 +77,7 @@ router.get("/donors", async (req, res) => {
         params.push(location);
     }
 
-    console.log("Executing SQL:", sql, "Parameters:", params); // ✅ Log query for debugging
+    console.log("Executing SQL:", sql, "Parameters:", params);
 
     try {
         const [results] = await db.promise().query(sql, params);
@@ -105,13 +101,45 @@ function authenticateToken(req, res, next) {
 
 router.get("/profile", authenticateToken, async (req, res) => {
     try {
-        const [hospital] = await db.promise().query("SELECT id, name, email, phone, location, registration_number FROM hospitals WHERE id = ?", [req.user.id]);
+        const [hospital] = await db.promise().query(
+            "SELECT id, name, email, phone, location, registration_number FROM hospitals WHERE id = ?", 
+            [req.user.id]
+        );
 
         if (hospital.length === 0) {
             return res.status(404).json({ message: "Hospital not found" });
         }
 
         res.json(hospital[0]);
+    } catch (error) {
+        res.status(500).json({ message: "Database error", error: error.message });
+    }
+});
+
+// ✅ 5️⃣ NEW: Raise Emergency Blood Request
+router.post("/emergency-request", authenticateToken, async (req, res) => {
+    try {
+        const { location, bloodGroup, message } = req.body;
+        const hospitalId = req.user.id; // Get hospital ID from the token
+
+        // Find matching donors
+        const [donors] = await db.promise().query(
+            "SELECT id FROM donors WHERE location = ? AND blood_group = ?", 
+            [location, bloodGroup]
+        );
+
+        if (donors.length === 0) {
+            return res.status(404).json({ message: "No donors found for this request" });
+        }
+
+        // Insert notifications for matching donors
+        const notificationValues = donors.map(donor => [donor.id, hospitalId, message, "pending"]);
+        await db.promise().query(
+            "INSERT INTO notifications (donor_id, hospital_id, message, status) VALUES ?",
+            [notificationValues]
+        );
+
+        res.status(201).json({ message: "Emergency request sent successfully", donorsNotified: donors.length });
     } catch (error) {
         res.status(500).json({ message: "Database error", error: error.message });
     }
