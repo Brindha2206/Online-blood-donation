@@ -78,3 +78,59 @@ GET http://localhost:5000/hospital/donors?location=salem
 
 ### ✅ Filter Donors by Blood Group & Location
 GET http://localhost:5000/hospital/donors?bloodGroup=B+&location=salem
+
+
+### 🩸 Get all donors (No Filters)
+GET http://localhost:5000/api/hospitals/donors
+Content-Type: application/json
+
+
+### 🩸 Filter by Blood Group (Case-Insensitive)
+GET http://localhost:5000/api/hospitals/donors?blood_group=A+
+Content-Type: application/json
+
+
+### 📍 Filter by Location
+GET http://localhost:5000/api/hospitals/donors?location=Chennai
+Content-Type: application/json
+
+
+### 🩸📍 Filter by Blood Group & Location
+GET http://localhost:5000/api/hospitals/donors?blood_group=O-&location=Bangalore
+Content-Type: application/json
+
+
+### ➕ Register a New Donor
+POST http://localhost:5000/api/hospitals/donors
+Content-Type: application/json
+
+{
+    "name": "Rahul Kumar",
+    "email": "rahul@example.com",
+    "phone": "9876543210",
+    "location": "Mumbai",
+    "blood_group": "A+"
+}
+
+
+### 🆔 Get Donor by ID
+GET http://localhost:5000/api/hospitals/donors/1
+Content-Type: application/json
+
+
+### ✏️ Update Donor by ID
+PUT http://localhost:5000/api/hospitals/donors/1
+Content-Type: application/json
+
+{
+    "name": "Rahul K",
+    "email": "rahulk@example.com",
+    "phone": "9876543210",
+    "location": "Pune",
+    "blood_group": "B+"
+}
+
+
+### ❌ Delete Donor by ID
+DELETE http://localhost:5000/api/hospitals/donors/1
+Content-Type: application/json

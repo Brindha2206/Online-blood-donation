@@ -52,10 +52,14 @@ const HospitalDashboard = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [donors, setDonors] = useState([]);
-  const [bloodGroup, setBloodGroup] = useState("");
+  const [blood_group, setBlood_group] = useState("");
   const [location, setLocation] = useState("");
+  const [selectedBloodGroup, setSelectedBloodGroup] = useState("");
+const [selectedLocation, setSelectedLocation] = useState("");
+
 
   useEffect(() => {
+    console.log(selectedBloodGroup, selectedLocation);  // Debugging
     const fetchHospitalData = async () => {
       const token = localStorage.getItem("hospitalToken");
       if (!token) {
@@ -85,12 +89,12 @@ const HospitalDashboard = () => {
     if (activeTab === 'donors') {
       fetchDonors();
     }
-  }, [bloodGroup, location, activeTab]);
+  }, [blood_group, location, activeTab]);
 
   const fetchDonors = async () => {
     let url = "http://localhost:5000/hospital/donors";
-    if (bloodGroup || location) {
-      url += `?bloodGroup=${bloodGroup}&location=${location}`;
+    if (blood_group || location) {
+      url += `?blood_group=${blood_group}&location=${location}`;
     }
 
     try {
@@ -238,8 +242,8 @@ const HospitalDashboard = () => {
               <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel>Blood Group</InputLabel>
                 <Select
-                  value={bloodGroup}
-                  onChange={(e) => setBloodGroup(e.target.value)}
+                  value={blood_group}
+                  onChange={(e) => setBlood_group(e.target.value)}
                   label="Blood Group"
                 >
                   <MenuItem value="">All</MenuItem>
@@ -283,7 +287,7 @@ const HospitalDashboard = () => {
                         <TableCell>{donor.email}</TableCell>
                         <TableCell>{donor.phone}</TableCell>
                         <TableCell>{donor.location}</TableCell>
-                        <TableCell>{donor.bloodGroup}</TableCell>
+                        <TableCell>{donor.blood_group}</TableCell>
                       </TableRow>
                     ))
                   ) : (
