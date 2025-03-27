@@ -210,6 +210,16 @@ const HospitalDashboard = () => {
   return (
     <ThemeProvider theme={medicalTheme}>
       <CssBaseline />
+       <Box
+              sx={{
+                backgroundImage: `url(${process.env.PUBLIC_URL}/blood-donation-dashboard-bg.png)`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed',
+                minHeight: '100vh',
+                py: 4
+              }}
+            >
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Navigation Tabs */}
         <Paper elevation={3} sx={{ mb: 4, borderRadius: 3 }}>
@@ -467,6 +477,7 @@ const HospitalDashboard = () => {
           </Button>
         </Box>
       </Container>
+      </Box>
     </ThemeProvider>
   );
 };

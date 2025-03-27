@@ -12,6 +12,7 @@ router.post("/register", async (req, res) => {
     return res.status(400).json({ message: "❌ All fields are required!" });
   }
 
+
   try {
     // ✅ Hash the password before storing in DB
     const hashedPassword = await bcrypt.hash(password, 10);

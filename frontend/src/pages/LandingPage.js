@@ -80,14 +80,24 @@ const LandingPage = () => {
       </AppBar>
 
       {/* Main content area */}
-      <Container maxWidth="sm" sx={{ 
-        textAlign: "center", 
-        mt: 8,
-        p: { xs: 3, sm: 4 },
-        borderRadius: '12px',
-        boxShadow: '0 4px 20px 0 rgba(0,0,0,0.08)',
-        backgroundColor: "background.paper",
-      }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundImage: `url("/blood-donation-landing.jpg")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          textAlign: "center",
+          p: { xs: 3, sm: 4 },
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px 0 rgba(0,0,0,0.08)',
+          backgroundColor: "rgba(255, 255, 255, 0.8)", // Add slight white overlay for readability
+        }}
+      >
         <Box sx={{ mb: 4 }}>
           <Typography 
             variant="h3" 
@@ -137,7 +147,7 @@ const LandingPage = () => {
               transition: 'all 0.2s ease'
             }}
           >
-            I Want to Donate
+            DONOR
           </Button>
           
           <Button
@@ -156,7 +166,7 @@ const LandingPage = () => {
               },
             }}
           >
-            Hospital Access
+            HOSPITAL
           </Button>
         </Box>
 

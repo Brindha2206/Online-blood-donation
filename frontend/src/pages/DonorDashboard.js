@@ -26,9 +26,16 @@ import {
   Chip,
   Badge
 } from "@mui/material";
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import {
+  Home as HomeIcon,
+  Notifications as NotificationsIcon,
+  Settings as SettingsIcon,
+  History as HistoryIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Edit as EditIcon,
+  Logout as LogoutIcon
+} from '@mui/icons-material';
 
 const medicalTheme = createTheme({
   palette: {
@@ -41,10 +48,17 @@ const medicalTheme = createTheme({
       main: '#00695c',
     },
     background: {
-      default: '#fafafa',
-      paper: '#ffffff',
+      default: 'rgba(255, 255, 255, 0.92)',
+      paper: 'rgba(255, 255, 255, 0.96)',
     },
   },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h4: {
+      fontWeight: 700,
+      letterSpacing: 0.5
+    }
+  }
 });
 
 const bloodGroupInfo = {
@@ -239,7 +253,7 @@ const DonorDashboard = () => {
         { response },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      fetchNotifications(); // Refresh notifications after response
+      fetchNotifications();
     } catch (error) {
       console.error("Error responding to notification:", error);
     }
@@ -247,42 +261,71 @@ const DonorDashboard = () => {
 
   if (isLoading) {
     return (
-      <Container maxWidth="md" sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '80vh' 
-      }}>
+      <Box
+        sx={{
+          backgroundImage: `url(${process.env.PUBLIC_URL}/blood-donation-dashboard-bg.jpg)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
         <CircularProgress size={60} color="primary" />
-      </Container>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="md" sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="h5" color="error" gutterBottom>
-          {error}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate("/donor-login")}
-          sx={{ mt: 2 }}
-        >
-          Return to Login
-        </Button>
-      </Container>
+      <Box
+        sx={{
+          backgroundImage: `url(${process.env.PUBLIC_URL}/blood-donation-dashboard-bg.jpg)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <Container maxWidth="md" sx={{ textAlign: 'center', backgroundColor: 'rgba(255, 255, 255, 0.9)', p: 4, borderRadius: 3 }}>
+          <Typography variant="h5" color="error" gutterBottom>
+            {error}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/donor-login")}
+            sx={{ mt: 2 }}
+          >
+            Return to Login
+          </Button>
+        </Container>
+      </Box>
     );
   }
 
   if (!donor) {
     return (
-      <Container maxWidth="md" sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="h5" color="error">
-          Donor data not available
-        </Typography>
-      </Container>
+      <Box
+        sx={{
+          backgroundImage: `url(${process.env.PUBLIC_URL}/blood-donation-dashboard-bg.jpg)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <Container maxWidth="md" sx={{ textAlign: 'center', backgroundColor: 'rgba(255, 255, 255, 0.9)', p: 4, borderRadius: 3 }}>
+          <Typography variant="h5" color="error">
+            Donor data not available
+          </Typography>
+        </Container>
+      </Box>
     );
   }
 
@@ -291,360 +334,393 @@ const DonorDashboard = () => {
   return (
     <ThemeProvider theme={medicalTheme}>
       <CssBaseline />
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Navigation Tabs */}
-        <Paper elevation={3} sx={{ mb: 4, borderRadius: 3 }}>
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            variant="fullWidth"
-            indicatorColor="primary"
-            textColor="primary"
-          >
-            <Tab label="Home" value="home" />
-            <Tab label="Donor Details" value="details" />
-            <Tab 
-              label={
-                <Badge badgeContent={notifications.length} color="error">
-                  Notifications
-                </Badge>
-              } 
-              value="notifications" 
-            />
-            <Tab label="Donation History" value="history" />
-            <Tab label="Settings" value="settings" />
-          </Tabs>
-        </Paper>
+      <Box
+        sx={{
+          backgroundImage: `url(${process.env.PUBLIC_URL}/blood-donation-dashboard-bg.png)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          minHeight: '100vh',
+          py: 4
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Navigation Tabs with Icons */}
+          <Paper elevation={3} sx={{ mb: 4, borderRadius: 3 }}>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              variant="fullWidth"
+              indicatorColor="primary"
+              textColor="primary"
+            >
+              <Tab icon={<HomeIcon />} label="Home" value="home" />
+              <Tab 
+                icon={
+                  <Badge badgeContent={notifications.length} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                } 
+                label="Notifications" 
+                value="notifications" 
+              />
+              <Tab icon={<HistoryIcon />} label="History" value="history" />
+              <Tab icon={<SettingsIcon />} label="Settings" value="settings" />
+            </Tabs>
+          </Paper>
 
-        {/* Home Tab */}
-        {activeTab === 'home' && (
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h4" align="center" gutterBottom sx={{ 
-              color: 'primary.dark',
-              fontWeight: 700,
-              mb: 3
-            }}>
-              Welcome, {donor.name}!
-            </Typography>
+          {/* Home Tab */}
+          {activeTab === 'home' && (
+            <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4, backgroundColor: 'background.paper' }}>
+              <Typography variant="h4" align="center" gutterBottom sx={{ 
+                color: 'primary.dark',
+                fontWeight: 700,
+                mb: 3
+              }}>
+                Welcome, {donor.name}!
+              </Typography>
 
-            {bloodInfo ? (
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
+              {bloodInfo ? (
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Card sx={{ height: '100%', borderLeft: '4px solid #8e1318' }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center' }}>
+                          <Box component="span" sx={{ 
+                            backgroundColor: 'primary.main', 
+                            color: 'white', 
+                            borderRadius: '50%', 
+                            width: 30, 
+                            height: 30, 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            mr: 1
+                          }}>
+                            {donor.blood_group}
+                          </Box>
+                          Your Blood Information
+                        </Typography>
+                        <Box sx={{ pl: 4 }}>
+                          <Typography variant="body1" sx={{ mb: 1 }}>
+                            <strong>Donate to:</strong> {bloodInfo.donateTo?.join(", ") || "Not specified"}
+                          </Typography>
+                          <Typography variant="body1">
+                            <strong>Receive from:</strong> {bloodInfo.receiveFrom?.join(", ") || "Not specified"}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Card sx={{ height: '100%', borderLeft: '4px solid #00695c' }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
+                          Donation Recommendations
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                          {bloodInfo.donationTips || "No specific recommendations available"}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Did you know?</strong> {bloodInfo.facts || "No facts available"}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+              ) : (
+                <Typography variant="body1" color="textSecondary" align="center">
+                  No blood group information available
+                </Typography>
+              )}
+            </Paper>
+          )}
+
+          {/* Notifications Tab */}
+          {activeTab === 'notifications' && (
+            <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4, backgroundColor: 'background.paper' }}>
+              <Typography variant="h4" align="center" gutterBottom sx={{ 
+                color: 'primary.dark',
+                fontWeight: 700,
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <NotificationsIcon sx={{ mr: 1 }} />
+                Emergency Notifications
+              </Typography>
+
+              {notifications.length === 0 ? (
+                <Card sx={{ textAlign: 'center', p: 3 }}>
+                  <Typography variant="body1" color="textSecondary">
+                    No new notifications
+                  </Typography>
+                </Card>
+              ) : (
+                <List>
+                  {notifications.map((notification) => (
+                    <React.Fragment key={notification.id}>
+                      <ListItem alignItems="flex-start" sx={{ backgroundColor: 'rgba(255, 0, 0, 0.05)' }}>
+                        <ListItemIcon>
+                          <Chip 
+                            label="URGENT" 
+                            color="error" 
+                            size="small" 
+                            sx={{ fontWeight: 'bold' }}
+                          />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              🏥 {notification.hospital_name}
+                            </Typography>
+                          }
+                          secondary={
+                            <>
+                              <Typography component="span" variant="body2" display="block">
+                                {notification.message}
+                              </Typography>
+                              <Typography component="span" variant="caption" color="text.secondary">
+                                {new Date(notification.createdAt).toLocaleString()}
+                              </Typography>
+                            </>
+                          }
+                        />
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            startIcon={<CheckCircleIcon />}
+                            onClick={() => handleNotificationResponse(notification.id, "accepted")}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<CancelIcon />}
+                            onClick={() => handleNotificationResponse(notification.id, "rejected")}
+                          >
+                            Reject
+                          </Button>
+                        </Box>
+                      </ListItem>
+                      <Divider component="li" />
+                    </React.Fragment>
+                  ))}
+                </List>
+              )}
+            </Paper>
+          )}
+
+          {/* Donation History Tab */}
+          {activeTab === 'history' && (
+            <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4, backgroundColor: 'background.paper' }}>
+              <Typography variant="h4" align="center" gutterBottom sx={{ 
+                color: 'primary.dark',
+                fontWeight: 700,
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <HistoryIcon sx={{ mr: 1 }} />
+                Your Donation History
+              </Typography>
+
+              <Card sx={{ width: '100%', borderLeft: '4px solid #8e1318' }}>
+                <CardContent>
+                  {donor.donation_history !== "nil" ? (
+                    <>
                       <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                        Your Blood Group: {donor.blood_group}
+                        Recent Donations
+                      </Typography>
+                      <Typography variant="body1">{donor.donation_history}</Typography>
+                    </>
+                  ) : (
+                    <Box textAlign="center" py={3}>
+                      <Typography variant="body1" color="textSecondary" paragraph>
+                        No donation records yet.
+                      </Typography>
+                      <Button variant="contained" color="primary">
+                        Find Donation Centers
+                      </Button>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Paper>
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4, backgroundColor: 'background.paper' }}>
+              <Typography variant="h4" align="center" gutterBottom sx={{ 
+                color: 'primary.dark',
+                fontWeight: 700,
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <SettingsIcon sx={{ mr: 1 }} />
+                Account Settings
+              </Typography>
+
+              {editMode ? (
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      margin="normal"
+                      required
+                    />
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      margin="normal"
+                      type="email"
+                      required
+                    />
+                    <TextField
+                      fullWidth
+                      label="Phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      margin="normal"
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      margin="normal"
+                      required
+                    />
+                    <TextField
+                      fullWidth
+                      select
+                      label="Blood Group"
+                      name="blood_group"
+                      value={formData.blood_group}
+                      onChange={handleChange}
+                      margin="normal"
+                      required
+                    >
+                      {Object.keys(bloodGroupInfo).map((group) => (
+                        <MenuItem key={group} value={group}>
+                          {group}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      fullWidth
+                      label="Date of Birth"
+                      name="date_of_birth"
+                      type="date"
+                      value={formData.date_of_birth}
+                      onChange={handleChange}
+                      margin="normal"
+                      InputLabelProps={{ shrink: true }}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleCancelEdit}
+                        startIcon={<CancelIcon />}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSave}
+                        startIcon={<CheckCircleIcon />}
+                      >
+                        Save Changes
+                      </Button>
+                    </Box>
+                  </Grid>
+                </Grid>
+              ) : (
+                <>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        <strong>Name:</strong> {donor.name}
+                      </Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        <strong>Email:</strong> {donor.email}
                       </Typography>
                       <Typography variant="body1">
-                        <strong>You can donate to:</strong> {bloodInfo.donateTo?.join(", ") || "Not specified"}
+                        <strong>Phone:</strong> {donor.phone}
                       </Typography>
-                      <Typography variant="body1" sx={{ mt: 1 }}>
-                        <strong>You can receive from:</strong> {bloodInfo.receiveFrom?.join(", ") || "Not specified"}
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        <strong>Location:</strong> {donor.location}
                       </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                        Donation Recommendations
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        <strong>Blood Group:</strong> {donor.blood_group || "Not specified"}
                       </Typography>
-                      <Typography variant="body1">{bloodInfo.donationTips || "No specific recommendations available"}</Typography>
-                      <Typography variant="body1" sx={{ mt: 2 }}>
-                        <strong>Did you know?</strong> {bloodInfo.facts || "No facts available"}
+                      <Typography variant="body1">
+                        <strong>Date of Birth:</strong> {donor.date_of_birth}
                       </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              </Grid>
-            ) : (
-              <Typography variant="body1" color="textSecondary" align="center">
-                No blood group information available
-              </Typography>
-            )}
-          </Paper>
-        )}
-
-        {/* Donor Details Tab */}
-        {activeTab === 'details' && (
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h4" align="center" gutterBottom sx={{ 
-              color: 'primary.dark',
-              fontWeight: 700,
-              mb: 3
-            }}>
-              Your Details
-            </Typography>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                      Personal Information
-                    </Typography>
-                    <Typography variant="body1"><strong>Name:</strong> {donor.name}</Typography>
-                    <Typography variant="body1"><strong>Email:</strong> {donor.email}</Typography>
-                    <Typography variant="body1"><strong>Phone:</strong> {donor.phone}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                      Additional Information
-                    </Typography>
-                    <Typography variant="body1"><strong>Location:</strong> {donor.location}</Typography>
-                    <Typography variant="body1"><strong>Blood Group:</strong> {donor.blood_group || "Not specified"}</Typography>
-                    <Typography variant="body1"><strong>Date of Birth:</strong> {donor.date_of_birth}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
-        )}
-
-        {/* Notifications Tab */}
-        {activeTab === 'notifications' && (
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h4" align="center" gutterBottom sx={{ 
-              color: 'primary.dark',
-              fontWeight: 700,
-              mb: 3
-            }}>
-              <NotificationsIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-              Emergency Notifications
-            </Typography>
-
-            {notifications.length === 0 ? (
-              <Typography variant="body1" color="textSecondary" align="center">
-                No new notifications
-              </Typography>
-            ) : (
-              <List>
-                {notifications.map((notification) => (
-                  <React.Fragment key={notification.id}>
-                    <ListItem alignItems="flex-start">
-                      <ListItemIcon>
-                        <Chip 
-                          label="URGENT" 
-                          color="error" 
-                          size="small" 
-                          sx={{ fontWeight: 'bold' }}
-                        />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={`🏥 ${notification.hospital_name}`}
-                        secondary={notification.message}
-                        secondaryTypographyProps={{ color: 'text.primary' }}
-                      />
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          size="small"
-                          startIcon={<CheckCircleIcon />}
-                          onClick={() => handleNotificationResponse(notification.id, "accepted")}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          startIcon={<CancelIcon />}
-                          onClick={() => handleNotificationResponse(notification.id, "rejected")}
-                        >
-                          Reject
-                        </Button>
-                      </Box>
-                    </ListItem>
-                    <Divider component="li" />
-                  </React.Fragment>
-                ))}
-              </List>
-            )}
-          </Paper>
-        )}
-
-        {/* Donation History Tab */}
-        {activeTab === 'history' && (
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h4" align="center" gutterBottom sx={{ 
-              color: 'primary.dark',
-              fontWeight: 700,
-              mb: 3
-            }}>
-              Your Donation History
-            </Typography>
-
-            <Card sx={{ width: '100%' }}>
-              <CardContent>
-                {donor.donation_history !== "nil" ? (
-                  <>
-                    <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                      Recent Donations
-                    </Typography>
-                    <Typography variant="body1">{donor.donation_history}</Typography>
-                  </>
-                ) : (
-                  <Typography variant="body1" color="textSecondary">
-                    No donation records yet. Consider making your first donation!
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Paper>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h4" align="center" gutterBottom sx={{ 
-              color: 'primary.dark',
-              fontWeight: 700,
-              mb: 3
-            }}>
-              Account Settings
-            </Typography>
-
-            {editMode ? (
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    margin="normal"
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    margin="normal"
-                    type="email"
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="Phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    margin="normal"
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    margin="normal"
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    select
-                    label="Blood Group"
-                    name="blood_group"
-                    value={formData.blood_group}
-                    onChange={handleChange}
-                    margin="normal"
-                    required
-                  >
-                    {Object.keys(bloodGroupInfo).map((group) => (
-                      <MenuItem key={group} value={group}>
-                        {group}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    fullWidth
-                    label="Date of Birth"
-                    name="date_of_birth"
-                    type="date"
-                    value={formData.date_of_birth}
-                    onChange={handleChange}
-                    margin="normal"
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={handleCancelEdit}
-                    >
-                      Cancel
-                    </Button>
+                    </Grid>
+                  </Grid>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={handleSave}
+                      onClick={handleEdit}
+                      startIcon={<EditIcon />}
                     >
-                      Save Changes
+                      Edit Information
                     </Button>
                   </Box>
-                </Grid>
-              </Grid>
-            ) : (
-              <>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body1"><strong>Name:</strong> {donor.name}</Typography>
-                    <Typography variant="body1"><strong>Email:</strong> {donor.email}</Typography>
-                    <Typography variant="body1"><strong>Phone:</strong> {donor.phone}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body1"><strong>Location:</strong> {donor.location}</Typography>
-                    <Typography variant="body1"><strong>Blood Group:</strong> {donor.blood_group || "Not specified"}</Typography>
-                    <Typography variant="body1"><strong>Date of Birth:</strong> {donor.date_of_birth}</Typography>
-                  </Grid>
-                </Grid>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleEdit}
-                  >
-                    Edit Information
-                  </Button>
-                </Box>
-              </>
-            )}
-          </Paper>
-        )}
+                </>
+              )}
+            </Paper>
+          )}
 
-        <Box textAlign="center" mt={4}>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleLogout}
-            sx={{
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              borderRadius: 2
-            }}
-          >
-            Logout
-          </Button>
-        </Box>
-      </Container>
+          <Box textAlign="center" mt={4}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleLogout}
+              startIcon={<LogoutIcon />}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: 2
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 };
